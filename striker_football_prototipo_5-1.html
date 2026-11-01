@@ -82,8 +82,45 @@ let bench=[{name:'Suplente 12',n:12},{name:'Suplente 14',n:14},{name:'Suplente 1
 let warmers=bench.map((p,i)=>({x:120+i*32,y:585+(i%2)*10,phase:i*.8}));
 let audioCtx=null;
 const comps={América:['Copa América','Copa Libertadores','Copa Sudamericana','Recopa Sudamericana','CONCACAF Gold Cup','CONCACAF Champions Cup','Copa América Femenina','Copa Libertadores Femenina'],Europa:['UEFA Euro','UEFA Champions League','UEFA Europa League','UEFA Conference League','UEFA Nations League','Eurocopa Femenina','UEFA Women’s Champions League'],África:['Copa Africana de Naciones','CAF Champions League','CAF Confederation Cup','CHAN','Copa Africana Femenina'],Asia:['Copa Asiática AFC','AFC Champions League Elite','AFC Champions League Two','Copa Asiática Femenina'],Oceanía:['Copa de Naciones OFC','OFC Champions League'],Mundial:['Copa Mundial FIFA','Mundial de Clubes FIFA','Mundial Sub-20','Mundial Sub-17','Mundial Femenino','Mundial de Clubes Femenino']};
-function showComps(cont){$('competitionList').innerHTML='';comps[cont].forEach(name=>{let b=document.createElement('button');b.textContent=name;b.className=name===selectedComp?'active':'';b.onclick=()=>{selectedComp=name;showComps(cont);$('compHint').textContent='Competición seleccionada: '+name};$('competitionList').appendChild(b)})}
-document.querySelectorAll('[data-cont]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-cont]').forEach(x=>x.classList.remove('active'));b.classList.add('active');showComps(b.dataset.cont)});
+let selectedCont='América';
+let selectedCategory='Selecciones';
+
+function showComps(){
+ const list=$('competitionList');
+ list.innerHTML='';
+ const names=comps[selectedCont][selectedCategory];
+
+ names.forEach(name=>{
+  let b=document.createElement('button');
+  b.textContent=name;
+  b.className=name===selectedComp?'active':'';
+  b.onclick=()=>{
+   selectedComp=name;
+   showComps();
+   $('compHint').textContent='Competición seleccionada: '+name;
+  };
+  list.appendChild(b);
+ });
+ $('compHint').textContent='Selecciona una competición de '+selectedCont+' · '+selectedCategory+'.';
+}
+
+document.querySelectorAll('[data-cont]').forEach(b=>{
+ b.onclick=()=>{
+  selectedCont=b.dataset.cont;
+  document.querySelectorAll('[data-cont]').forEach(x=>x.classList.toggle('active',x===b));
+  showComps();
+ };
+});
+
+document.querySelectorAll('[data-category]').forEach(b=>{
+ b.onclick=()=>{
+  selectedCategory=b.dataset.category;
+  document.querySelectorAll('[data-category]').forEach(x=>x.classList.toggle('active',x===b));
+  showComps();
+ };
+});
+
+showComps();{document.querySelectorAll('[data-cont]').forEach(x=>x.classList.remove('active'));b.classList.add('active');showComps(b.dataset.cont)});
 showComps('América');
 document.querySelectorAll('.club').forEach(el=>el.onclick=()=>{document.querySelectorAll('.club').forEach(x=>x.style.outline='');el.style.outline='2px solid #e2a72c';$('clubchoice').textContent='Club seleccionado: '+el.textContent});
 $('national').onchange=()=>{let v=$('national').value;opponent=v.includes('Chile')?'Argentina 🇦🇷':'Chile 🇨🇱';$('matchTitle').innerHTML='<b>'+v+' vs '+opponent+'</b><div class="muted" id="stadium">🏟️ Estadio Monumental David Arellano</div>';score()};
@@ -93,13 +130,13 @@ function audioReady(){if(!audioCtx){audioCtx=new(window.AudioContext||window.web
 function tone(freq=440,duration=.12,type='sine',volume=.045){if(muted)return;try{audioReady();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(volume,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch(e){}}
 function sound(kind){if(muted)return;if(kind==='whistle'){tone(1050,.22,'sine');setTimeout(()=>tone(1250,.18,'sine'),120)}else if(kind==='kick')tone(115,.08,'triangle',.08);else if(kind==='goal'){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.35,'sawtooth',.035),i*130));}else if(kind==='crowd'){tone(180,.45,'sawtooth',.025);setTimeout(()=>tone(240,.5,'sawtooth',.02),180)}else if(kind==='card')tone(330,.2,'square')}
 function drawCrowd(){for(let y=8;y<92;y+=13){for(let x=25;x<975;x+=13){let frenzy=celebrate>0;ctx.fillStyle=frenzy?['#ffe27a','#fff','#ff4545','#ff9b35'][Math.floor((x*3+y*7)%4)]:['#e9d4aa','#d34d4d','#f4f5ef','#2e6ba4','#e3bd43','#253b50'][Math.floor((x*3+y*7)%6)];ctx.beginPath();let bounce=Math.sin(performance.now()/110+x*.08+y*.12)*(frenzy?6:2);ctx.arc(x,y+bounce,3.5,0,7);ctx.fill()}}}
-function player(x,y,color,n,keeper=false,name=''){ctx.fillStyle='#00100a66';ctx.beginPath();ctx.ellipse(x,y+11,13,5,0,0,7);ctx.fill();ctx.fillStyle=keeper?'#f4c542':color;ctx.beginPath();ctx.arc(x,y-10,7,0,7);ctx.fill();ctx.fillRect(x-7,y-4,14,20);ctx.fillStyle='white';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText(n,x,y+9);if(name){let label=name.length>17?name.slice(0,16)+'…':name;ctx.font='bold 10px Arial';let w=ctx.measureText(label).width+7;ctx.fillStyle='#061522d9';ctx.fillRect(x-w/2,y-31,w,12);ctx.fillStyle='#fff';ctx.fillText(label,x,y-22)}}
-function draw(){
- ctx.clearRect(0,0,1000,620);ctx.fillStyle='#273b49';ctx.fillRect(0,0,1000,620);
- // Estadio visible alrededor del campo: gradas, techo, focos y público.
- ctx.fillStyle='#102a3b';ctx.fillRect(0,0,1000,98);ctx.fillRect(0,575,1000,45);
- ctx.fillStyle='#dce7ee';for(let i=0;i<9;i++){ctx.fillRect(65+i*110,10,4,28);ctx.fillRect(65+i*110,580,4,25)}
- drawCrowd();
+function  player ( x , y , color , n , keeper = false , name = '' ) { ctx . fillStyle = '#00100a66' ; ctx . beginPath ( ) ; ctx . ellipse ( x , y + 11 , 13 , 5 , 0 , 0 , 7 ) ; ctx . fill ( ) ; ctx . fillStyle = keeper ? '#f4c542' : color ; ctx . beginPath ( ) ; ctx . arc ( x , y - 10 , 7 , 0 , 7 ) ; ctx . fill ( ) ; ctx . fillRect ( x - 7 , y - 4 , 14 , 20 ) ; ctx . fillStyle = 'white' ; ctx.font = ' bold 9px Arial ' ; ctx.textAlign = ' center ' ; ctx.fillText ( n , x , y + 9 ) ; if ( name ) { let label = name.length > 17 ? name.slice ( 0 , 16 ) + ' … ' : name ; ctx.font = ' bold 10px Arial ' ; let w = ctx.measureText ( label ) .width + 7 ; ctx​​​  . fillStyle = '#061522d9' ; ctx . fillRect ( x - w / 2 , y - 31 , w , 12 ) ; ctx . fillStyle = '#fff' ; ctx . fillText ( label , x , y - 22 ) } }
+función  dibujar ( ) {
+ ctx.clearRect ( 0 , 0 , 1000 , 620 ) ; ctx.fillStyle = ' # 273b49 ' ; ctx.fillRect ( 0 , 0 , 1000 , 620 ) ;​​​
+ // Estadio visible alrededor del campo: grados, techo, focos y público.
+ ctx.fillStyle = ' # 102a3b ' ; ctx.fillRect ( 0 , 0 , 1000 , 98 ) ; ctx.fillRect ( 0 , 575 , 1000 , 45 ) ;​​​
+ ctx.fillStyle = ' # dce7ee ' ; for ( let i = 0 ; i < 9 ; i ++ ) { ctx.fillRect ( 65 + i * 110 , 10 , 4 , 28 ) ; ctx.fillRect ( 65 + i * 110 , 580 , 4 , 25 ) }​​​ 
+ dibujarMultitud ( ) ;
  if(introActive){ctx.save();let z=1+Math.min(0.18,(90-introFrames)/90*.18);ctx.translate(500,335);ctx.scale(z,z);ctx.translate(-500,-335)}
  ctx.fillStyle='#187a3f';ctx.fillRect(70,95,860,480);for(let i=0;i<8;i++){ctx.fillStyle=i%2?'#ffffff09':'#0019000b';ctx.fillRect(70,95+i*60,860,60)}
  ctx.strokeStyle='white';ctx.lineWidth=3;ctx.strokeRect(70,95,860,480);ctx.beginPath();ctx.moveTo(70,335);ctx.lineTo(930,335);ctx.stroke();ctx.beginPath();ctx.ellipse(500,335,75,30,0,0,7);ctx.stroke();ctx.strokeRect(355,95,290,75);ctx.strokeRect(355,500,290,75);ctx.strokeRect(425,95,150,28);ctx.strokeRect(425,547,150,28);
