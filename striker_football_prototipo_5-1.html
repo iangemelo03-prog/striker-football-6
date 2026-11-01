@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Striker Football</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#071522;color:#f5fbff;font-family:system-ui,Arial}header{padding:15px 18px;background:#102b40;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}h1{font-size:clamp(20px,4vw,29px);margin:0}main{max-width:1100px;margin:auto;padding:14px}.panel{background:#102b40;border:1px solid #28516a;border-radius:14px;padding:13px;margin-bottom:12px}.row{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}label{font-weight:700;display:block;margin-bottom:5px}select,button{font:inherit;border:0;border-radius:9px;padding:10px}select{background:#eaf3f8;color:#102b40;max-width:100%}button{background:#159b67;color:white;font-weight:800;cursor:pointer}button.active{background:#e2a72c;color:#102b40}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.tabs button{background:#28516a}.tabs button.active{background:#e2a72c;color:#102b40}.teams{display:flex;gap:7px;flex-wrap:wrap}.teamchip{background:#183b50;border:1px solid #41677e;border-radius:9px;padding:8px 10px;font-size:13px}.teamchip.selected{outline:2px solid #e2a72c}.clubbar{display:flex;gap:8px;overflow:auto;padding:8px 0}.club{min-width:105px;background:#183b50;border-radius:9px;padding:9px;text-align:center;font-size:13px}canvas{width:100%;height:auto;display:block;border-radius:12px;background:#16743c;touch-action:none}.hud{display:flex;justify-content:space-around;flex-wrap:wrap;gap:8px;margin-top:9px}.hud span{background:#081d2b;border-radius:9px;padding:8px 13px}#score{font-size:24px;font-weight:900}#msg{min-height:24px;color:#ffe08a;text-align:center;font-weight:700;margin:8px}.controls{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}.pad{display:grid;grid-template-columns:repeat(3,44px);gap:4px}.pad button{background:#28516a;padding:9px 0}.actions{display:flex;gap:7px;flex-wrap:wrap}.actions button{min-width:62px;height:47px}.muted{color:#bdd1df;font-size:13px}
+.extra{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:10px}
+.subpanel{background:#0a2131;border:1px solid #28516a;border-radius:10px;padding:10px}
+.subpanel h3{margin:0 0 8px;font-size:15px}
+#bench,#warming{display:flex;gap:6px;flex-wrap:wrap}
+.person{background:#183b50;border:1px solid #41677e;border-radius:8px;padding:7px;font-size:12px}
+.person button{padding:5px 7px;font-size:11px;margin-left:4px}
+#replayBox{display:none;background:#071522;border:1px solid #e2a72c;border-radius:10px;padding:10px;margin-top:10px}
+#replayCanvas{width:100%;max-width:500px;height:auto;display:block;margin:8px auto;background:#16743c;border-radius:8px}
+.cardmark{display:inline-block;width:13px;height:18px;border-radius:2px;margin-left:4px;vertical-align:middle}
+.yellow{background:#ffd928}.red{background:#ef3030}
+.gameview{position:relative;overflow:hidden;border-radius:12px;background:#123}
+.overlay-controls{position:absolute;inset:auto 10px 10px 10px;display:flex;justify-content:space-between;align-items:end;pointer-events:none;gap:8px}
+.overlay-pad,.overlay-actions{pointer-events:auto;display:flex;flex-direction:column;gap:4px}
+.overlay-pad{align-items:center}.overlay-pad>div{display:flex;gap:4px}
+.overlay-pad button,.overlay-actions button{background:#082638df;border:1px solid #ffffff8a;color:white;min-width:42px;min-height:39px;padding:7px 9px;box-shadow:0 2px 7px #0008;touch-action:none}
+.overlay-actions{flex-direction:row;flex-wrap:wrap;justify-content:flex-end}.overlay-actions button{font-size:11px;min-width:52px}
+.intro-banner{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:#061a2cdd;border:1px solid #f4d16d;border-radius:20px;padding:8px 14px;font-weight:900;white-space:nowrap;font-size:clamp(11px,2vw,16px);text-shadow:0 1px 4px #000;pointer-events:none}
+@media(max-width:600px){.overlay-controls{inset:auto 5px 5px 5px}.overlay-pad button,.overlay-actions button{min-width:35px;min-height:34px;padding:5px;font-size:10px}.overlay-actions{max-width:62%}.intro-banner{top:6px}}
+@media(max-width:600px){.extra{grid-template-columns:1fr}}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:600px){.two{grid-template-columns:1fr}.actions button{min-width:55px;font-size:12px}}
+</style></head><body>
+<header><div><h1>⚽ STRIKER FOOTBALL</h1><small>Fútbol · Modo carrera · Modo entrenador</small></div><b>🏆 STRIKER FOOTBALL</b></header>
+<main>
+<section class="panel">
+ <b>🎮 Modos de juego</b>
+ <div class="tabs" id="modeTabs"><button class="active" data-mode="Partido rápido">⚽ Partido rápido</button><button data-mode="Modo carrera">🏆 Modo carrera</button><button data-mode="Modo entrenador">📋 Modo entrenador</button></div>
+ <div id="modeInfo" class="muted">Partido rápido: elige tus equipos y juega.</div>
+</section>
+<section class="panel">
+ <div class="row"><div><b>🌎 Selecciones nacionales</b><div class="muted">Elige una selección para tu partido.</div></div><select id="national"><option>Chile 🇨🇱</option><option>Argentina 🇦🇷</option><option>Brasil 🇧🇷</option><option>Uruguay 🇺🇾</option><option>Colombia 🇨🇴</option><option>México 🇲🇽</option><option>Estados Unidos 🇺🇸</option><option>España 🇪🇸</option><option>Francia 🇫🇷</option><option>Alemania 🇩🇪</option><option>Inglaterra 🏴</option><option>Japón 🇯🇵</option></select></div>
+ <div class="teams" id="nationalbar"><span class="teamchip selected">🇨🇱 Chile</span><span class="teamchip">🇦🇷 Argentina</span><span class="teamchip">🇧🇷 Brasil</span><span class="teamchip">🇺🇾 Uruguay</span><span class="teamchip">🇨🇴 Colombia</span><span class="teamchip">🇲🇽 México</span><span class="teamchip">🇺🇸 Estados Unidos</span></div>
+</section>
+<section class="panel">
+ <b>🏟️ Clubes</b><div class="muted">Barra de clubes destacados. Selecciona uno para representar en partidos de clubes.</div>
+ <div class="clubbar" id="clubbar"><div class="club">🔴 Colo-Colo</div><div class="club">🔵 Universidad de Chile</div><div class="club">⚪ Universidad Católica</div><div class="club">🟡 Boca Juniors</div><div class="club">🔴 River Plate</div><div class="club">🟢 Palmeiras</div><div class="club">⚫ Flamengo</div><div class="club">🔵 Real Madrid</div><div class="club">🔴 Barcelona</div><div class="club">🔴 Liverpool</div><div class="club">🔵 Manchester City</div><div class="club">🔴 Bayern Múnich</div></div>
+ <div class="muted" id="clubchoice">Club seleccionado: Colo-Colo</div>
+</section>
+<section class="panel">
+ <b>🌍 Competiciones por continente</b><div class="tabs" id="continentTabs"><button class="active" data-cont="América">América</button><button data-cont="Europa">Europa</button><button data-cont="África">África</button><button data-cont="Asia">Asia</button><button data-cont="Oceanía">Oceanía</button><button data-cont="Mundial">Mundial</button></div>
+ <div id="competitionList" class="teams"></div>
+ <div class="muted" id="compHint">Selecciona una competición para ver su categoría en el menú.</div>
+</section>
+<section class="panel">
+ <div class="row"><div id="matchTitle"><b>🇨🇱 Chile vs Argentina 🇦🇷</b><div class="muted" id="stadium">🏟️ Estadio Monumental David Arellano</div></div><div id="score">🇨🇱 0 — 0 🇦🇷</div><button id="start">▶ Comenzar partido</button></div>
+ <div class="gameview"><canvas id="pitch" width="1000" height="620" aria-label="Cancha con once titulares, arcos y aficionados"></canvas><div class="overlay-controls"><div class="overlay-pad"><button data-k="up">▲</button><div><button data-k="left">◀</button><button data-k="down">▼</button><button data-k="right">▶</button></div></div><div class="overlay-actions"><button id="pass">PASE</button><button id="shoot">⚽ TIRAR</button><button id="sprint">CORRER</button><button id="dribble">REGATE</button></div></div><div id="introBanner" class="intro-banner">🎥 CÁMARA AÉREA · STRIKER FOOTBALL</div></div>
+ <div class="hud"><span>⏱️ <b id="clock">90:00</b></span><span>📍 <b id="phase">Fase de grupos</b></span><span>🏟️ <b id="stadiumHud">Monumental David Arellano</b></span><span>👥 <b>22 titulares + suplentes</b></span></div>
+ <div id="msg">Ian es el delantero centro número 10 de Chile. ¡El equipo está listo!</div>
+ <div class="extra">
+  <div class="subpanel"><h3>🧑‍⚖️ Árbitro</h3><div id="refStatus">Árbitro principal en cancha · Sin tarjetas</div><div class="actions" style="margin-top:8px"><button id="yellowCard">🟨 Amarilla</button><button id="redCard">🟥 Roja</button><button id="foul">⚠️ Simular falta</button></div></div>
+  <div class="subpanel"><h3>🪑 Banquillo y cambios</h3><div class="muted">Selecciona un suplente para que entre por Ian.</div><div id="bench"></div></div>
+  <div class="subpanel"><h3>🏃 Calentamiento</h3><div id="warming">Suplentes preparándose...</div><div class="muted">Cuando haya gol, los que calientan correrán a celebrar con el goleador.</div></div>
+ </div>
+ <div class="extra">
+  <div class="subpanel"><h3>🎥 Repetición</h3><div id="replayText">La repetición aparecerá después de un gol.</div><div id="replayBox"><b>REPETICIÓN DEL GOL</b><canvas id="replayCanvas" width="500" height="280"></canvas><button id="closeReplay">Cerrar repetición</button></div></div>
+  <div class="subpanel"><h3>🔊 Sonidos</h3><div id="soundStatus">Sonidos activados al tocar un botón.</div><button id="soundToggle">🔊 Activar / silenciar</button></div>
+ </div>
+</section>
+<section class="panel"><b>📋 Once titular de Chile</b><div class="two"><div><b>Formación 4-3-3 · Plantilla de referencia</b><div class="muted">Nombres reales de futbolistas conocidos; no representa una convocatoria oficial confirmada para 2026.</div><ol><li>Portero — 1</li><li>Defensa derecho — 2</li><li>Defensa central — 3</li><li>Defensa central — 4</li><li>Defensa izquierdo — 5</li><li>Mediocampista — 6</li><li>Mediocampista — 8</li><li>Mediocampista ofensivo — 11</li><li>Extremo derecho — 7</li><li><b>Ian — 10 — Delantero centro</b></li><li>Extremo izquierdo — 9</li></ol></div><div><b>Elementos del estadio</b><ul><li>Dos arcos con redes</li><li>Tribunas con público animado</li><li>Marcador y reloj</li><li>Bandas de cancha y áreas</li><li>Once jugadores por equipo</li></ul></div></div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id),cv=$('pitch'),ctx=cv.getContext('2d');
+let keys={},running=false,time=90,home=0,away=0,sprint=false,muted=false,bookings={yellow:0,red:0},lastGoal=null,celebrate=0,substituted=false;
+let ball={x:500,y:360,vx:0,vy:0},ian={x:500,y:435},ref={x:500,y:330},opponent='Argentina 🇦🇷',selectedComp='Copa América';
+let introFrames=0,introActive=false,selectedMode='Partido rápido',careerWeek=1,managerTactic='4-3-3';
+const homeRoster=[
+ {n:1,name:'Brayan Cortés',role:'GK'},{n:4,name:'Mauricio Isla',role:'DF'},{n:5,name:'Paulo Díaz',role:'DF'},{n:3,name:'Guillermo Maripán',role:'DF'},{n:2,name:'Gabriel Suazo',role:'DF'},
+ {n:8,name:'Arturo Vidal',role:'MF'},{n:6,name:'Erick Pulgar',role:'MF'},{n:10,name:'Alexis Sánchez',role:'FW'},{n:7,name:'Darío Osorio',role:'FW'},{n:9,name:'Ian',role:'FW'},{n:11,name:'Ben Brereton',role:'FW'}
+];
+const awayRoster=[
+ {n:23,name:'Emiliano Martínez',role:'GK'},{n:4,name:'Gonzalo Montiel',role:'DF'},{n:13,name:'Cristian Romero',role:'DF'},{n:19,name:'Nicolás Otamendi',role:'DF'},{n:3,name:'Nicolás Tagliafico',role:'DF'},
+ {n:7,name:'Rodrigo De Paul',role:'MF'},{n:24,name:'Enzo Fernández',role:'MF'},{n:20,name:'Alexis Mac Allister',role:'MF'},{n:10,name:'Lionel Messi',role:'FW'},{n:9,name:'Julián Álvarez',role:'FW'},{n:11,name:'Ángel Di María',role:'FW'}
+];
+const homePositions=[[500,535],[205,465],[400,475],[600,475],[795,465],[345,390],[500,410],[655,390],[215,285],[500,320],[785,285]];
+const awayPositions=[[500,135],[205,205],[400,195],[600,195],[795,205],[345,280],[500,260],[655,280],[215,345],[500,330],[785,345]];
+function makeTeam(roster,positions,home){return roster.map((r,i)=>({x:positions[i][0],y:positions[i][1],home,n:r.n,name:r.name,role:r.role,baseX:positions[i][0],baseY:positions[i][1]}))}
+let homeAI=makeTeam(homeRoster,homePositions,true),awayAI=makeTeam(awayRoster,awayPositions,false);
+let bench=[{name:'Suplente 12',n:12},{name:'Suplente 14',n:14},{name:'Suplente 17',n:17},{name:'Suplente 19',n:19},{name:'Suplente 21',n:21}];
+let warmers=bench.map((p,i)=>({x:120+i*32,y:585+(i%2)*10,phase:i*.8}));
+let audioCtx=null;
+const comps={América:['Copa América','Copa Libertadores','Copa Sudamericana','Recopa Sudamericana','CONCACAF Gold Cup','CONCACAF Champions Cup','Copa América Femenina','Copa Libertadores Femenina'],Europa:['UEFA Euro','UEFA Champions League','UEFA Europa League','UEFA Conference League','UEFA Nations League','Eurocopa Femenina','UEFA Women’s Champions League'],África:['Copa Africana de Naciones','CAF Champions League','CAF Confederation Cup','CHAN','Copa Africana Femenina'],Asia:['Copa Asiática AFC','AFC Champions League Elite','AFC Champions League Two','Copa Asiática Femenina'],Oceanía:['Copa de Naciones OFC','OFC Champions League'],Mundial:['Copa Mundial FIFA','Mundial de Clubes FIFA','Mundial Sub-20','Mundial Sub-17','Mundial Femenino','Mundial de Clubes Femenino']};
+function showComps(cont){$('competitionList').innerHTML='';comps[cont].forEach(name=>{let b=document.createElement('button');b.textContent=name;b.className=name===selectedComp?'active':'';b.onclick=()=>{selectedComp=name;showComps(cont);$('compHint').textContent='Competición seleccionada: '+name};$('competitionList').appendChild(b)})}
+document.querySelectorAll('[data-cont]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-cont]').forEach(x=>x.classList.remove('active'));b.classList.add('active');showComps(b.dataset.cont)});
+showComps('América');
+document.querySelectorAll('.club').forEach(el=>el.onclick=()=>{document.querySelectorAll('.club').forEach(x=>x.style.outline='');el.style.outline='2px solid #e2a72c';$('clubchoice').textContent='Club seleccionado: '+el.textContent});
+$('national').onchange=()=>{let v=$('national').value;opponent=v.includes('Chile')?'Argentina 🇦🇷':'Chile 🇨🇱';$('matchTitle').innerHTML='<b>'+v+' vs '+opponent+'</b><div class="muted" id="stadium">🏟️ Estadio Monumental David Arellano</div>';score()};
+function score(){$('score').textContent=$('national').value.split(' ').slice(-1)[0]+' '+home+' — '+away+' '+opponent.split(' ').slice(-1)[0]}
+function say(s){$('msg').textContent=s}
+function audioReady(){if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)()}if(audioCtx.state==='suspended')audioCtx.resume()}
+function tone(freq=440,duration=.12,type='sine',volume=.045){if(muted)return;try{audioReady();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(volume,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch(e){}}
+function sound(kind){if(muted)return;if(kind==='whistle'){tone(1050,.22,'sine');setTimeout(()=>tone(1250,.18,'sine'),120)}else if(kind==='kick')tone(115,.08,'triangle',.08);else if(kind==='goal'){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.35,'sawtooth',.035),i*130));}else if(kind==='crowd'){tone(180,.45,'sawtooth',.025);setTimeout(()=>tone(240,.5,'sawtooth',.02),180)}else if(kind==='card')tone(330,.2,'square')}
+function drawCrowd(){for(let y=8;y<92;y+=13){for(let x=25;x<975;x+=13){let frenzy=celebrate>0;ctx.fillStyle=frenzy?['#ffe27a','#fff','#ff4545','#ff9b35'][Math.floor((x*3+y*7)%4)]:['#e9d4aa','#d34d4d','#f4f5ef','#2e6ba4','#e3bd43','#253b50'][Math.floor((x*3+y*7)%6)];ctx.beginPath();let bounce=Math.sin(performance.now()/110+x*.08+y*.12)*(frenzy?6:2);ctx.arc(x,y+bounce,3.5,0,7);ctx.fill()}}}
+function player(x,y,color,n,keeper=false,name=''){ctx.fillStyle='#00100a66';ctx.beginPath();ctx.ellipse(x,y+11,13,5,0,0,7);ctx.fill();ctx.fillStyle=keeper?'#f4c542':color;ctx.beginPath();ctx.arc(x,y-10,7,0,7);ctx.fill();ctx.fillRect(x-7,y-4,14,20);ctx.fillStyle='white';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText(n,x,y+9);if(name){let label=name.length>17?name.slice(0,16)+'…':name;ctx.font='bold 10px Arial';let w=ctx.measureText(label).width+7;ctx.fillStyle='#061522d9';ctx.fillRect(x-w/2,y-31,w,12);ctx.fillStyle='#fff';ctx.fillText(label,x,y-22)}}
+function draw(){
+ ctx.clearRect(0,0,1000,620);ctx.fillStyle='#273b49';ctx.fillRect(0,0,1000,620);
+ // Estadio visible alrededor del campo: gradas, techo, focos y público.
+ ctx.fillStyle='#102a3b';ctx.fillRect(0,0,1000,98);ctx.fillRect(0,575,1000,45);
+ ctx.fillStyle='#dce7ee';for(let i=0;i<9;i++){ctx.fillRect(65+i*110,10,4,28);ctx.fillRect(65+i*110,580,4,25)}
+ drawCrowd();
+ if(introActive){ctx.save();let z=1+Math.min(0.18,(90-introFrames)/90*.18);ctx.translate(500,335);ctx.scale(z,z);ctx.translate(-500,-335)}
+ ctx.fillStyle='#187a3f';ctx.fillRect(70,95,860,480);for(let i=0;i<8;i++){ctx.fillStyle=i%2?'#ffffff09':'#0019000b';ctx.fillRect(70,95+i*60,860,60)}
+ ctx.strokeStyle='white';ctx.lineWidth=3;ctx.strokeRect(70,95,860,480);ctx.beginPath();ctx.moveTo(70,335);ctx.lineTo(930,335);ctx.stroke();ctx.beginPath();ctx.ellipse(500,335,75,30,0,0,7);ctx.stroke();ctx.strokeRect(355,95,290,75);ctx.strokeRect(355,500,290,75);ctx.strokeRect(425,95,150,28);ctx.strokeRect(425,547,150,28);
+ ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.strokeRect(425,80,150,15);ctx.strokeRect(425,575,150,15);ctx.strokeStyle='#d7e3e8';ctx.lineWidth=1;for(let xx=430;xx<575;xx+=15){ctx.beginPath();ctx.moveTo(xx,80);ctx.lineTo(xx,95);ctx.moveTo(xx,575);ctx.lineTo(xx,590);ctx.stroke()}
+ homeAI.forEach((p,i)=>player(i===9?ian.x:p.x,i===9?ian.y:p.y,'#d32638',String(p.n),p.role==='GK',p.name));
+ awayAI.forEach((p)=>player(p.x,p.y,'#f1f1f1',String(p.n),p.role==='GK',p.name));
+ warmers.forEach((p,i)=>{let jump=Math.sin(performance.now()/180+p.phase)*3;player(p.x,p.y+jump,'#f0c83e',String(bench[i]?.n||12))});
+ // Árbitro vestido de negro, con silbato
+ player(ref.x,ref.y,'#20242a','R');ctx.fillStyle='#ffe08a';ctx.font='bold 10px Arial';ctx.fillText('ÁRBITRO',ref.x,ref.y-25);
+ ctx.fillStyle='white';ctx.beginPath();ctx.arc(ball.x,ball.y,7,0,7);ctx.fill();ctx.strokeStyle='#111';ctx.stroke();
+ ctx.fillStyle='white';ctx.font='bold 13px Arial';ctx.fillText('TRIBUNA NORTE',420,70);ctx.fillText('TRIBUNA SUR',440,610);
+ if(celebrate>0){ctx.fillStyle='#ffe58a';ctx.font='bold 28px Arial';ctx.textAlign='center';ctx.fillText('¡¡¡GOOOOOOL!!!',500,315);ctx.textAlign='left'}
+ if(introActive){ctx.restore();ctx.fillStyle='#ffe58a';ctx.font='bold 22px Arial';ctx.textAlign='center';ctx.fillText('VISTA AÉREA DEL ESTADIO',500,115);ctx.textAlign='left'}
+}
+function shoot(){if(!running)return;let dx=500-ball.x,dy=105-ball.y,d=Math.hypot(dx,dy)||1;ball.vx=dx/d*10;ball.vy=dy/d*10;say('¡Ian arma la pierna! ¡Disparo al arco!');sound('kick')}
+function pass(){if(running){ball.vx=(500-ian.x)*.04;ball.vy=-7;say('¡Ian busca un compañero!');sound('kick')}}
+function createBench(){ $('bench').innerHTML='';bench.forEach((p,i)=>{let el=document.createElement('span');el.className='person';el.textContent=p.name+' #'+p.n;let b=document.createElement('button');b.textContent='ENTRAR';b.onclick=()=>{if(substituted){say('En este prototipo solo está habilitado un cambio de prueba.');return}substituted=true;ian.x=homeAI[9].x;ian.y=homeAI[9].y;homeAI[9].n=p.n;homeAI[9].x=ian.x;homeAI[9].y=ian.y;el.style.opacity='.4';b.disabled=true;say(p.name+' entra al campo por Ian. ¡Cambio realizado!');sound('whistle')};el.appendChild(b);$('bench').appendChild(el)})}
+function showWarmers(){ $('warming').innerHTML=bench.map(p=>'<span class="person">🏃 '+p.name+'</span>').join('')}
+function book(color){bookings[color]++;let card=color==='yellow'?'🟨 AMARILLA':'🟥 ROJA';$('refStatus').innerHTML='Árbitro: '+card+' mostrada · Amarillas: '+bookings.yellow+' · Rojas: '+bookings.red+' <span class="cardmark '+(color==='yellow'?'yellow':'red')+'"></span>';say('¡El árbitro muestra '+(color==='yellow'?'tarjeta amarilla!':'TARJETA ROJA!'));sound('card')}
+function foul(){if(!running)return;sound('whistle');let c=Math.random()<.72?'yellow':'red';book(c);say('¡Falta en la mitad de la cancha! '+(c==='yellow'?'El árbitro amonesta.':'¡Expulsado!'))}
+function snapshotGoal(team){lastGoal={team,score:$('score').textContent,clock:$('clock').textContent,x:ball.x,y:ball.y};$('replayText').textContent='Gol de '+team+' · '+lastGoal.clock+' · Marcador: '+lastGoal.score;$('replayBox').style.display='block';let rc=$('replayCanvas'),r=rc.getContext('2d');r.fillStyle='#16743c';r.fillRect(0,0,500,280);r.strokeStyle='white';r.lineWidth=3;r.strokeRect(20,15,460,250);r.strokeRect(175,15,150,55);r.strokeRect(175,210,150,55);r.beginPath();r.moveTo(250,15);r.lineTo(250,265);r.stroke();r.fillStyle='#d32638';r.beginPath();r.arc(250,190,12,0,7);r.fill();r.fillStyle='white';r.beginPath();r.arc(250,100,8,0,7);r.fill();r.fillStyle='#ffe08a';r.font='bold 18px Arial';r.fillText('REPETICIÓN · '+team,135,145);$('replayBox').scrollIntoView({behavior:'smooth',block:'nearest'})}
+function goal(team){if(team==='Chile'){home++}else{away++}score();snapshotGoal(team);celebrate=220;warmers.forEach((p,i)=>{p.x=360+i*45;p.y=340+(i%2)*18});say('¡¡¡GOL DE '+team.toUpperCase()+'!!! ¡La afición enloquece y los suplentes que calentaban corren a abrazar al goleador!');sound('goal');sound('crowd');ball={x:500,y:360,vx:0,vy:0};if(time<=12)say('¡¡¡GOOOOL EN LOS ÚLTIMOS MINUTOS!!! ¡El estadio es una locura! Los suplentes invaden la celebración.')}
+function selectMode(mode){
+ selectedMode=mode;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+ if(mode==='Modo carrera'){$('modeInfo').textContent='Modo carrera: guía a Ian desde sus primeros partidos, mejora sus habilidades y avanza semana a semana. Temporada '+careerWeek+'.';$('start').textContent='▶ Iniciar carrera';}
+ else if(mode==='Modo entrenador'){$('modeInfo').textContent='Modo entrenador: administra la alineación, elige la táctica y dirige al equipo desde la banda. Táctica: '+managerTactic+'.';$('start').textContent='▶ Dirigir equipo';}
+ else{$('modeInfo').textContent='Partido rápido: elige tus equipos y juega.';$('start').textContent='▶ Comenzar partido'}
+}
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>selectMode(b.dataset.mode));
+function cinematicKickoff(){
+ introActive=true;introFrames=120;$('introBanner').style.display='block';$('introBanner').textContent='🎥 CÁMARA AÉREA · SOBRE EL ESTADIO';
+ say('La cámara vuela sobre el estadio y muestra la cancha llena. ¡Los equipos toman sus posiciones!');
+ sound('crowd');
+ let countdown=()=>{if(introFrames>0){introFrames--;setTimeout(countdown,35)}else{introActive=false;$('introBanner').textContent='🧑‍⚖️ ¡EL ÁRBITRO PITA! ¡COMIENZA EL PARTIDO!';sound('whistle');say('¡Piiiiii! ¡Comienza el partido!');running=true;setTimeout(()=>{$('introBanner').style.display='none'},1800)}};
+ countdown();
+}
+function start(){
+ running=false;time=90;home=0;away=0;bookings={yellow:0,red:0};substituted=false;
+ ian={x:500,y:435};ref={x:500,y:330};ball={x:500,y:360,vx:0,vy:0};
+ homeAI=makeTeam(homeRoster,homePositions,true);awayAI=makeTeam(awayRoster,awayPositions,false);
+ $('refStatus').textContent='Árbitro principal en cancha · Sin tarjetas';$('replayBox').style.display='none';
+ celebrate=0;score();$('clock').textContent='90:00';$('phase').textContent=selectedComp;
+ $('stadiumHud').textContent='Estadio Monumental David Arellano';
+ if($('stadium'))$('stadium').textContent='🏟️ Estadio Monumental David Arellano';
+ createBench();showWarmers();cinematicKickoff();
+}
+function moveAI(){
+ const update=(team,attackingUp)=>{
+  team.forEach((p,i)=>{
+   let tx=p.baseX,ty=p.baseY;
+   const towardGoal=attackingUp?-1:1;
+   const ballProgress=(ball.y-335)*towardGoal;
+   if(p.role==='GK'){
+    tx=Math.max(435,Math.min(565,ball.x));
+    ty=attackingUp?545:125;
+   }else if(p.role==='DF'){
+    tx=p.baseX+(ball.x-500)*.12;
+    ty=p.baseY+Math.max(-18,Math.min(24,ballProgress*.10));
+   }else if(p.role==='MF'){
+    tx=p.baseX+(ball.x-500)*.22;
+    ty=p.baseY+Math.max(-55,Math.min(55,ballProgress*.22));
+   }else{
+    tx=p.baseX+(ball.x-500)*.16;
+    ty=p.baseY+towardGoal*Math.max(-32,Math.min(48,ballProgress*.16));
+   }
+   // Ian remains under the user's control; all other players follow their tactical role.
+   if(p.home&&i===9){tx=ian.x;ty=ian.y}
+   const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy)||1;
+   const speed=p.role==='GK'?.8:p.role==='DF'?.55:p.role==='MF'?.85:1.05;
+   if(d>2){p.x+=dx/d*Math.min(speed,d);p.y+=dy/d*Math.min(speed,d)}
+   p.x=Math.max(90,Math.min(910,p.x));
+   if(p.role==='GK')p.y=attackingUp?Math.max(515,Math.min(562,p.y)):Math.max(108,Math.min(158,p.y));
+   else if(p.role==='DF')p.y=attackingUp?Math.max(400,Math.min(505,p.y)):Math.max(165,Math.min(270,p.y));
+   else if(p.role==='MF')p.y=attackingUp?Math.max(285,Math.min(455,p.y)):Math.max(235,Math.min(390,p.y));
+   else p.y=attackingUp?Math.max(105,Math.min(355,p.y)):Math.max(265,Math.min(555,p.y));
+  });
+ };
+ update(homeAI,true);update(awayAI,false);
+ const targetX=ball.x+(ball.x>500?-35:35),targetY=ball.y+(ball.y>335?-25:25);
+ ref.x+=(targetX-ref.x)*.018;ref.y+=(targetY-ref.y)*.018;
+ ref.x=Math.max(100,Math.min(900,ref.x));ref.y=Math.max(120,Math.min(550,ref.y));
+}
+function tick(){if(running){time-=1/60;if(time<=0){time=0;running=false;say('¡Final del partido!');sound('whistle')}$('clock').textContent=String(Math.floor(time)).padStart(2,'0')+':00';
+ let dx=(keys.right?1:0)-(keys.left?1:0),dy=(keys.down?1:0)-(keys.up?1:0),d=Math.hypot(dx,dy)||1,sp=sprint?4.2:2.7;ian.x=Math.max(90,Math.min(910,ian.x+dx/d*sp));ian.y=Math.max(110,Math.min(565,ian.y+dy/d*sp));
+ if(Math.hypot(ball.x-ian.x,ball.y-ian.y)<23){ball.vx+=(ball.x-ian.x)*.1;ball.vy+=(ball.y-ian.y)*.1}
+ moveAI();ball.x+=ball.vx;ball.y+=ball.vy;ball.vx*=.985;ball.vy*=.985;
+ if(ball.y<100&&ball.x>425&&ball.x<575)goal('Chile');if(ball.y>570&&ball.x>425&&ball.x<575)goal('Argentina');
+ if(ball.x<75||ball.x>925)ball.vx*=-.7;if(ball.y<98||ball.y>572)ball.vy*=-.7;
+ if(celebrate>0){celebrate--;warmers.forEach((p,i)=>{let tx=ian.x+(i-2)*13,ty=ian.y-20;p.x+=(tx-p.x)*.04;p.y+=(ty-p.y)*.04})}
+ }draw();requestAnimationFrame(tick)}
+$('start').onclick=start;$('shoot').onclick=shoot;$('pass').onclick=pass;$('sprint').onpointerdown=()=>sprint=true;$('sprint').onpointerup=$('sprint').onpointerleave=()=>sprint=false;$('dribble').onclick=()=>{say('¡Amague y cambio de dirección de Ian!');sound('kick')};
+$('yellowCard').onclick=()=>book('yellow');$('redCard').onclick=()=>book('red');$('foul').onclick=foul;$('closeReplay').onclick=()=>{$('replayBox').style.display='none'};
+$('soundToggle').onclick=()=>{muted=!muted;$('soundStatus').textContent=muted?'Sonidos silenciados.':'Sonidos activados.';$('soundToggle').textContent=muted?'🔇 Activar sonido':'🔊 Silenciar';if(!muted)sound('whistle')};
+document.querySelectorAll('[data-k]').forEach(b=>{b.onpointerdown=e=>{e.preventDefault();keys[b.dataset.k]=true};b.onpointerup=b.onpointerleave=()=>keys[b.dataset.k]=false});
+document.onkeydown=e=>{let k=e.key.toLowerCase();if(k==='w'||k==='arrowup')keys.up=true;if(k==='s'||k==='arrowdown')keys.down=true;if(k==='a'||k==='arrowleft')keys.left=true;if(k==='d'||k==='arrowright')keys.right=true;if(k===' ')shoot();if(k==='p')pass();if(k==='shift')sprint=true};
+document.onkeyup=e=>{let k=e.key.toLowerCase();if(k==='w'||k==='arrowup')keys.up=false;if(k==='s'||k==='arrowdown')keys.down=false;if(k==='a'||k==='arrowleft')keys.left=false;if(k==='d'||k==='arrowright')keys.right=false;if(k==='shift')sprint=false};
+createBench();showWarmers();score();selectMode('Partido rápido');$('introBanner').style.display='none';draw();requestAnimationFrame(tick);
+</script></body></html>
