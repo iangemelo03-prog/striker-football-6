@@ -1,0 +1,30 @@
+name: Build STRIKER FOOTBALL 6.0
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Instalar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Copiar juego
+        run: |
+          mkdir -p app/src/main/assets
+          cp striker_football_prototipo_5-1.html app/src/main/assets/index.html
+
+      - name: Compilar APK
+        run: |
+          echo "Preparando STRIKER FOOTBALL 6.0"
