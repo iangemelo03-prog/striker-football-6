@@ -1,0 +1,16 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.iangemelo.strikerfootball'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.iangemelo.strikerfootball'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '6.0'
+    }
+}
